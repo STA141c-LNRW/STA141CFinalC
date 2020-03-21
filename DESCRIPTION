@@ -1,0 +1,18 @@
+Package: STA141CFinal
+Type: Package
+Title: What the package does (short line)
+Version: 1.0
+Date: 2020-03-20
+Authors@R: 
+    c(person("William", "Shih", email = "wshih@ucdavis.edu", role = c("aut")),
+    person("Ricardo", "Simpao", email = "rlsimpao@ucdavis.edu", role = c("aut")),
+    person("Nilay", "Varshney", email = "nvarshney@ucdavis.edu", role = c("aut", "cre")),
+    person("Luke", "Yee", email = "leyee@ucdavis.edu", role = c("aut")))
+Description: This R package provides functions for fitting linear regression models on 
+  datasets with continuous response variables through the use of Bag of Little Bootstraps. 
+  Users can determine regression coefficients, estimate the variance of errors, and predict 
+  new data. Users also have the option to use parallel computing.
+License: What license is it under?
+Imports: Rcpp (>= 1.0.3)
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.0.2

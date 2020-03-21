@@ -1,0 +1,107 @@
+---
+title: "Package demo"
+author: "William Shih, Ricardo Simpao, Nilay Varshney, Luke Yee"
+date: "3/20/2020"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here is an example of how our package functions run. For our data set, we are using a "SGEMM GPU kernel performance Data Set," which measures the running times of a matrix-matrix product, given different parameter combinations.
+
+```{r load, message = FALSE, warning = FALSE}
+library(devtools)
+library(tidyverse)
+library(STA141CFinal)
+library(furrr)
+
+set.seed(141)
+dat = read_csv("sgemm_product.csv")
+dat = dat[sample(241000, 1000),]
+dat2 = dat[1:100,]
+```
+
+```{r linear regression with bootstrap, cache = TRUE}
+#We specifiy a specific column set
+y = dat$`Run1 (ms)`
+x = dat[,1:(ncol(dat)-4)]
+
+#linear model objects
+fit = linear_reg_bs_C(x, y, s = 10, r = 1000)
+```
+
+# Linear Regression with blb
+```{r, echo = FALSE, cache = TRUE}
+(b0 = bench::mark(
+  linear_reg_bs(x = x, y = y, s = 10, r = 1000),
+  linear_reg_bs_par(x = x, y = y, s = 10, r = 1000),
+ linear_reg_bs_C(x, y, s = 10, r = 1000),
+  check = FALSE)
+)
+
+ggplot2::autoplot(b0)
+```
+
+# 95 % Confidence Interval for Variable Coefficients
+```{r CI of coef, cache = TRUE}
+coef_CI(fit, alpha = 0.05)
+
+coef_CI_par(fit,alpha = 0.05)
+coef_CI_C(fit,alpha = 0.05)
+
+
+(b1 = bench::mark(
+  coef_CI(fit, alpha = 0.05),
+  coef_CI_par(fit,alpha = 0.05),
+  coef_CI_C(fit, alpha = 0.05),
+  check = FALSE)
+)
+
+ggplot2::autoplot(b1)
+```
+
+Notice that `coef_CI_par` offers better memory allocation than `coef_CI`.
+
+# 95% Prediction Interval
+
+```{r prediction interval, cache = TRUE}
+plan(multiprocess, workers = 4)
+PI(fit, dat2[1:3, 1:14], alpha = 0.05)
+PI_par(fit, dat2[1:3, 1:14], alpha = 0.05)
+PI_C(fit, dat2[1:3, 1:14], alpha = 0.05)
+
+(b2 = bench::mark(
+  PI(fit, dat2[1:3, 1:14], alpha = 0.05),
+  PI_par(fit, dat2[1:3, 1:14], alpha = 0.05),
+  PI_C(fit, dat2[1:3, 1:14], alpha = 0.05),
+  check = FALSE)
+)
+
+ggplot2::autoplot(b2)
+```
+
+# 95 % Confindence Interval for Variance
+```{r variance interval, cache = TRUE}
+s2_CI(fit, alpha = 0.05)
+s2_CI_par(fit, alpha = 0.05)
+s2_CI_C(fit, alpha = 0.05)
+
+(b3 = bench::mark(
+  s2_CI(fit, alpha = 0.05),
+  s2_CI_par(fit, alpha = 0.05),
+  s2_CI_C(fit, alpha = 0.05),
+  check = FALSE)
+)
+
+ggplot2::autoplot(b3)
+```
+
+
+
+Notice that `s2_CI_par` offers better memory allocation than `s2_CI`.
+
+
+
